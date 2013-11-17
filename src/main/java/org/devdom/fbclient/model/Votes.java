@@ -18,7 +18,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "Votes.findAll", query = "SELECT v FROM Votes v"),
     @NamedQuery(name = "Votes.findByFbOptionId", query = "SELECT v FROM Votes v WHERE v.votesPK.fbOptionId = :fbOptionId"),
-    @NamedQuery(name = "Votes.findByFbUid", query = "SELECT v FROM Votes v WHERE v.votesPK.fbUid = :fbUid")})
+    @NamedQuery(name = "Votes.findByFbUid", query = "SELECT v FROM Votes v WHERE v.votesPK.fbUid = :fbUid"),
+    @NamedQuery(name = "Votes.delByFBOptionId", query = "DELETE FROM Votes v WHERE v.votesPK.fbOptionId = :fbOptionId")})
 public class Votes implements Serializable {
     private static final long serialVersionUID = 1L;
     @EmbeddedId
