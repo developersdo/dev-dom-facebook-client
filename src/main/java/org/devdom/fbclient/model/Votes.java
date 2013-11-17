@@ -58,10 +58,7 @@ public class Votes implements Serializable {
             return false;
         }
         Votes other = (Votes) object;
-        if ((this.votesPK == null && other.votesPK != null) || (this.votesPK != null && !this.votesPK.equals(other.votesPK))) {
-            return false;
-        }
-        return true;
+        return (this.votesPK != null || other.votesPK == null) && (this.votesPK == null || this.votesPK.equals(other.votesPK));
     }
 
     @Override
