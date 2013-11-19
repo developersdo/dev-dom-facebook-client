@@ -13,8 +13,6 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import org.devdom.fbclient.Configuration;
-import org.devdom.fbclient.FQL;
 import org.devdom.fbclient.model.dto.Skillset;
 import org.devdom.fbclient.model.dto.Users;
 import org.devdom.fbclient.model.dto.Votes;
