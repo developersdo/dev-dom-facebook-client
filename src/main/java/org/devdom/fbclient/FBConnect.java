@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import org.devdom.fbclient.model.dto.Skillset;
+import org.devdom.fbclient.model.dto.University;
 import org.devdom.fbclient.model.dto.Users;
 import org.devdom.fbclient.model.dto.Votes;
 import org.devdom.fbclient.model.dto.VotesPK;
@@ -68,7 +69,7 @@ public class FBConnect {
         }
     }
     
-    public JSONArray getSkills(){
+    public JSONArray getOptions(){
         try {
             String query = FQL.QUESTION_OPTIONS;
             query = query.replace(":question_id",questionID);
@@ -81,7 +82,7 @@ public class FBConnect {
     
     public int totalFBVotes(){
         int count = 0;
-        JSONArray result = getSkills();
+        JSONArray result = getOptions();
         try {
             for (int i = 0; i < result.length(); i++){
                 JSONObject json = result.getJSONObject(i); 
@@ -175,19 +176,66 @@ public class FBConnect {
         em.getTransaction().commit();
     }
 
+    public void updateUniversities() {
+        EntityManager em = getEntityManager();
+        List<University> universities = em.createNamedQuery("University.findAll").getResultList();
+        int added = 0;
+        int updated = 0;
+        JSONArray result = getOptions();
+        boolean exists;
+        em.getTransaction().begin();
+        for(int i=0;i<result.length();i++){
+            try {
+                exists = false;
+                JSONObject json = result.getJSONObject(i);
+                Long fbId = Long.valueOf( json.getString("id") );
+                for(University university : universities){
+                    if(fbId == university.getFbId()){
+                        exists=true;
+                        university.setVotes(Short.valueOf(json.getString("votes")));
+                        Logger.getLogger(FBConnect.class.getName()).log(Level.INFO, "{0} es la nueva cantida de votos para la universidad {1} ", new Object[]{json.getString("votes"), json.getString("name")});
+                        updated++;
+                        Logger.getLogger(FBConnect.class.getName()).log(Level.INFO, "{0} = {1} ", new Object[]{fbId, university.getFbId()});
+                        break;
+                    }
+                }
+                if(!exists){
+                    University newUni = new University();
+                    newUni.setFbId( fbId ); 
+                    newUni.setName(json.getString("name"));
+                    newUni.setVotes(Short.valueOf( json.getString("votes") )); 
+                    em.persist(newUni);
+                    Logger.getLogger(FBConnect.class.getName()).log(Level.INFO, "fue agregada la universidad {0} con {1} votos", new Object[]{json.getString("name"), json.getString("votes")});
+                    added++;
+                }
+                
+                int count = updateVotes(json.getLong("id"));
+                if(count>0){
+                    Logger.getLogger(FBConnect.class.getName()).log(Level.INFO, "fueron añadidas {0} universidades", count );
+                }
+            } catch (JSONException ex) {
+                Logger.getLogger(FBConnect.class.getName()).log(Level.SEVERE, null, ex);
+                em.getTransaction().rollback();
+            }
+        }
+        em.getTransaction().commit();
+        //em.getTransaction().rollback();
+    }
+
     public void updateSkills(){
 
         EntityManager em = getEntityManager();
         List<Skillset> skills = em.createNamedQuery("Skillset.findAll").getResultList();
         
         int updated = 0;
-        JSONArray result = getSkills();
+        JSONArray result = getOptions();
         for(Skillset skill : skills){
             for (int i = 0; i < result.length(); i++){
                 try {
                     em.getTransaction().begin();
                     JSONObject json = result.getJSONObject(i);
-                    if( json.get("id").equals(skill.getOptionId()) ){
+                    Long skillID = Long.valueOf(json.getString("id"));
+                    if( skillID == skill.getOptionId() ){
                         if(!json.get("votes").equals(skill.getVotes())){
                             updated++;
                             Logger.getLogger(FBConnect.class.getName()).log(Level.INFO, "skill : {0}", json.getString("name"));
@@ -212,7 +260,7 @@ public class FBConnect {
         }
         Logger.getLogger(FBConnect.class.getName()).log(Level.INFO, "skill actualizados: {0}", updated);
     }
-
+    
     /**
      * @return the questionID
      */

@@ -16,6 +16,10 @@ public class App
         fbConnect.setQuestionID("562574913759358"); //Cuales son tus skillls? (Plataforma para la que desarrollas)
         fbConnect.updateSkills();
         fbConnect.setQuestionID("558308817519301"); //Cuales son tus skillls? (Manejadores de versión)
+        fbConnect.updateSkills();
+        fbConnect.setQuestionID("606824229334426"); //Universidades
+        fbConnect.updateSkills();
+        fbConnect.updateUniversities();
         fbConnect.updateDevelopers();
     }
 }
